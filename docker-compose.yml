@@ -2,36 +2,32 @@ version: "3.9"
 
 services:
   traefik-dev:
-      image: traefik:v3.1
-      container_name: traefik-dev
-      restart: unless-stopped
-      command:
-        - --log.level=INFO
-        # Entrypoints (HTTP + HTTPS)
-        - --entrypoints.web.address=:80
-        - --entrypoints.websecure.address=:443
-        - --entrypoints.web.http.redirections.entrypoint.to=websecure
-        - --entrypoints.web.http.redirections.entrypoint.scheme=https
-        # Enable Docker as a provider
-        - --providers.docker=true
-        - --providers.docker.exposedbydefault=false
-        # Let's Encrypt configuration
-        - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-        - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-        - --certificatesresolvers.letsencrypt.acme.email=mrx4807@gmail.com
-        - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-        # Optional dashboard (accessible on :8080)
-        - --api.dashboard=true
-        - --api.insecure=true
-      ports:
-        - "80:80"
-        - "443:443"
-        - "8080:8080"
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock:ro
-        - ./letsencrypt:/letsencrypt
-      networks:
-        - lexion_internal_net
+    image: traefik:v3.1
+    container_name: traefik-dev
+    restart: unless-stopped
+    command:
+      - --log.level=INFO
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=mrx4807@gmail.com
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --api.dashboard=true
+      - --api.insecure=true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - lexion_internal_net
 
   frontend:
     build:
@@ -108,31 +104,6 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  jenkins:
-    build:
-      context: .
-      dockerfile: Dockerfile.jenkins
-    container_name: jenkins-server
-    restart: unless-stopped
-    user: root
-    ports:
-      - "50000:50000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./jenkins_data:/var/jenkins_home
-    environment:
-      - DOCKER_HOST=unix:///var/run/docker.sock
-    networks:
-      - lexion_internal_net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.jenkins.rule=Host(`${JENKINS_DOMAIN}`)"
-      - "traefik.http.routers.jenkins.entrypoints=websecure"
-      - "traefik.http.routers.jenkins.tls.certresolver=letsencrypt"
-      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
-      - "traefik.http.routers.jenkins-webhook.rule=Host(`${JENKINS_DOMAIN}`) && PathPrefix(`/github-webhook/`)"
-      - "traefik.http.routers.jenkins-webhook.entrypoints=websecure"
-      - "traefik.http.routers.jenkins-webhook.tls.certresolver=letsencrypt"
   minio_init:
     image: minio/mc
     depends_on:
@@ -146,8 +117,6 @@ services:
       "
     networks:
       - lexion_internal_net
-
-
 
 volumes:
   minio_data:
