@@ -12,7 +12,6 @@ import {
   ListIcon,
   Circle,
 } from "lucide-react";
-import { getContractVersion } from "@/lib/demo-versioning";
 import { formatDate } from "date-fns";
 import { useState } from "react";
 import { motion } from "motion/react";

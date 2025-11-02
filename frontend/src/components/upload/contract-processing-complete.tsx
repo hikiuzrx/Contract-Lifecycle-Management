@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { CheckCircle2Icon, ClipboardList, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Clause, Risk } from "@/actions/contracts";
+import type { Clause, ComplianceFinding } from "@/actions/contracts";
 
 interface ContractData {
   _id: string;
@@ -12,7 +12,7 @@ interface ContractData {
 interface ComplianceData {
   compliance_score: number;
   status: string;
-  issues?: Risk[];
+  issues?: ComplianceFinding[];
   [key: string]: unknown;
 }
 

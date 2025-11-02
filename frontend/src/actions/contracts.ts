@@ -9,7 +9,7 @@ export enum ContractStatus {
 }
 
 export interface Clause {
-  clause_id?: string;
+  clause_id: string;
   text?: string;
   content?: string;
   heading?: string;
