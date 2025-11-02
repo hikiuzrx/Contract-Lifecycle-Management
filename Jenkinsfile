@@ -2,28 +2,28 @@ pipeline {
   agent any
 
   environment {
-    # ---- GHCR Settings ----
+    // ---- GHCR Settings ----
     GHCR_USERNAME = "hikiuzrx"
-    GHCR_TOKEN = "ghp_yourClassicTokenHere"    // 👈 replace with your GHCR classic token
 
-    # ---- Image Tags ----
+    // ---- Image Tags ----
     IMAGE_BACKEND = "ghcr.io/hikiuzrx/contract-backend:latest"
     IMAGE_FRONTEND = "ghcr.io/hikiuzrx/contract-frontend:latest"
 
-    # ---- ECS Server ----
+    // ---- ECS Server ----
     ECS_HOST = "150.40.161.66"
-    SSH_USER = "root"                          // 👈 change if not root
-    SSH_PASS = "Zynfy1-rerkor-nibjid"          // 👈 replace with ECS password
+    SSH_USER = "root"
   }
 
   stages {
 
     stage('Login to GHCR') {
       steps {
-        sh '''
-          echo "🔐 Logging in to GHCR..."
-          echo $GHCR_TOKEN | docker login ghcr.io -u $GHCR_USERNAME --password-stdin
-        '''
+        withCredentials([string(credentialsId: 'ghcr-token', variable: 'GHCR_TOKEN')]) {
+          sh '''
+            echo "🔐 Logging in to GHCR..."
+            echo $GHCR_TOKEN | docker login ghcr.io -u $GHCR_USERNAME --password-stdin
+          '''
+        }
       }
     }
 
@@ -53,30 +53,32 @@ pipeline {
 
     stage('Deploy to ECS (Docker Swarm)') {
       steps {
-        sh '''
-          echo "🔗 Connecting to ECS and deploying stack..."
-          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$ECS_HOST "
-            echo '📦 Pulling latest images...'
-            docker pull $IMAGE_BACKEND
-            docker pull $IMAGE_FRONTEND
+        withCredentials([string(credentialsId: 'ecs-ssh-password', variable: 'SSH_PASS')]) {
+          sh '''
+            echo "🔗 Connecting to ECS and deploying stack..."
+            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$ECS_HOST "
+              echo '📦 Pulling latest images...'
+              docker pull $IMAGE_BACKEND
+              docker pull $IMAGE_FRONTEND
 
-            echo '📂 Updating stack file (contract-stack.yaml)...'
-            cd ~
-            if [ -f contract-stack.yaml ]; then
-              echo '✔ Stack file found.'
-            else
-              echo '⚠️ Stack file not found. Please upload it to ~/ on ECS.'
-            fi
+              echo '📂 Updating stack file (contract-stack.yaml)...'
+              cd ~
+              if [ -f contract-stack.yaml ]; then
+                echo '✔ Stack file found.'
+              else
+                echo '⚠️ Stack file not found. Please upload it to ~/ on ECS.'
+              fi
 
-            echo '🚀 Deploying stack...'
-            docker stack deploy -c ~/contract-stack.yaml contract_stack
+              echo '🚀 Deploying stack...'
+              docker stack deploy -c ~/contract-stack.yaml contract_stack
 
-            echo '🧹 Cleaning unused images...'
-            docker image prune -af || true
+              echo '🧹 Cleaning unused images...'
+              docker image prune -af || true
 
-            echo '✅ Swarm deployment completed successfully!'
-          "
-        '''
+              echo '✅ Swarm deployment completed successfully!'
+            "
+          '''
+        }
       }
     }
   }
