@@ -53,13 +53,19 @@ pipeline {
 
     stage('Deploy to ECS (Docker Swarm)') {
       steps {
-        withCredentials([string(credentialsId: 'ecs-ssh-password', variable: 'SSH_PASS')]) {
+        withCredentials([
+          string(credentialsId: 'ecs-ssh-password', variable: 'SSH_PASS'),
+          string(credentialsId: 'ghcr-token', variable: 'GHCR_TOKEN')
+        ]) {
           sh '''
             echo "🔗 Connecting to ECS and deploying stack..."
             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$ECS_HOST "
+              echo '🔐 Logging in to GHCR on ECS server...'
+              echo '$GHCR_TOKEN' | docker login ghcr.io -u '$GHCR_USERNAME' --password-stdin
+
               echo '📦 Pulling latest images...'
-              docker pull $IMAGE_BACKEND
-              docker pull $IMAGE_FRONTEND
+              docker pull '$IMAGE_BACKEND'
+              docker pull '$IMAGE_FRONTEND'
 
               echo '📂 Updating stack file (contract-stack.yaml)...'
               cd ~
