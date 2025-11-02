@@ -2,16 +2,7 @@ import { Sparkles, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
 import { analyzeClause } from "@/lib/ai-copilot-engine";
-
-interface Clause {
-  clause_id?: string;
-  text?: string;
-  content?: string;
-  heading?: string;
-  level?: number;
-  type?: string;
-  confidence?: number;
-}
+import type { Clause } from "@/actions/contracts";
 
 interface ClauseItemProps {
   clause: Clause;

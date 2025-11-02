@@ -15,7 +15,7 @@ import {
 import { formatDate } from "date-fns";
 import { useState } from "react";
 import { motion } from "motion/react";
-import type { Clause, ComplianceFinding, ContractDocument } from "@/actions/contracts";
+import type { ComplianceFinding, ContractDocument } from "@/actions/contracts";
 
 type Risk = ComplianceFinding;
 

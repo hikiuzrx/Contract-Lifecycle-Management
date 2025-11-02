@@ -1,15 +1,6 @@
 import { ListIcon } from "lucide-react";
 import { ClauseItem } from "./clause-item";
-
-interface Clause {
-  clause_id?: string;
-  text?: string;
-  content?: string;
-  heading?: string;
-  level?: number;
-  type?: string;
-  confidence?: number;
-}
+import type { Clause } from "@/actions/contracts";
 
 interface ClauseListProps {
   clauses: Clause[];
