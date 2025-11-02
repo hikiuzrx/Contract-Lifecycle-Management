@@ -15,61 +15,12 @@ import {
 import { formatDate } from "date-fns";
 import { useState } from "react";
 import { motion } from "motion/react";
+import type { Clause, ComplianceFinding, ContractDocument } from "@/actions/contracts";
 
-interface Clause {
-  clause_id: string;
-  text: string;
-  content?: string;
-  heading?: string;
-  level?: number;
-  type?: string;
-  confidence?: number;
-}
-
-interface Risk {
-  finding_id: string;
-  finding_type: string;
-  domain: string;
-  severity: string;
-  impact: string;
-  confidence_score: number;
-  title: string;
-  description: string;
-  affected_clauses: Array<{
-    clause_id: string;
-    heading?: string;
-    excerpt?: string;
-  }>;
-  policy_violations?: Array<{
-    policy_name: string;
-    requirement: string;
-    section?: string;
-  }>;
-  remediation_actions: Array<{
-    action_type: string;
-    description: string;
-    priority: number;
-  }>;
-  business_consequence?: string;
-  source: string;
-}
-
-interface Contract {
-  _id?: string;
-  file_name?: string;
-  category?: string;
-  created_at?: string;
-  last_updated?: string;
-  status?: string;
-  risk_level?: string;
-  version?: number;
-  compliance_score?: number;
-  risks?: Risk[];
-  clauses?: Clause[];
-}
+type Risk = ComplianceFinding;
 
 interface OverviewContentProps {
-  contract: Contract;
+  contract: ContractDocument;
   setActiveTab?: (tabId: string) => void;
 }
 
